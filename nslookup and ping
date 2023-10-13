@@ -1,0 +1,40 @@
+If you want to ping each IP address once and only keep it if the ping is successful, you can modify the script like this:
+
+```bash
+#!/bin/bash
+
+# Define the list of VLANs
+vlanlist=(1 2 32)
+
+# Output file to store the results
+output_file="ping_results.txt"
+
+# Clear the output file (if it exists)
+> "$output_file"
+
+# Function to ping an IP address and save the results
+perform_ping() {
+    ip="$1"
+    if ping -c 1 "$ip" >/dev/null 2>&1; then
+        echo "IP: $ip is up" >> "$output_file"
+    fi
+}
+
+# Iterate through the list of VLANs and perform ping
+for vlan in "${vlanlist[@]}"; do
+    for i in {0..255}; do
+        ip="10.16.$vlan.$i"
+        perform_ping "$ip"
+    done
+done
+
+echo "Results are stored in $output_file"
+```
+
+In this modified script:
+
+1. The `perform_ping` function takes an IP address as an argument and performs a single ping to that IP address. If the ping is successful, it saves the result in the output file.
+
+2. In the main loop, for each VLAN and IP address, it calls the `perform_ping` function. Only successful pings are recorded in the output file.
+
+After running this script, you'll have a text file (`ping_results.txt`) that contains the IP addresses that responded to ping, indicating that they are up.
